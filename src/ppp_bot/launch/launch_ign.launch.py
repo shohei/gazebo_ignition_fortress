@@ -69,13 +69,12 @@ def parameter_bridge(context: LaunchContext, world_name):
     args = [
             '/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan',
             f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/image@sensor_msgs/msg/Image[ignition.msgs.Image',
-            f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo',
-            f'/world/{world_name_str}/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock']
+            f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo']
     node = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=args,
-        remappings=[(f'/world/{world_name_str}/clock', '/clock')]
+        parameters=[{'use_sim_time': True}]
     )
     return [node]
 
@@ -111,7 +110,8 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='lidar_static_transform_publisher',
-        arguments = ['--x', '0.05', '--y', '0', '--z', '0.15', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'lidar_frame', '--child-frame-id', 'ppp_bot/base_link/gpu_lidar']
+        arguments = ['--x', '0.05', '--y', '0', '--z', '0.15', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'lidar_frame', '--child-frame-id', 'ppp_bot/base_link/gpu_lidar'],
+        parameters=[{'use_sim_time': True}]
     )
 
     # The camera is positioned at (0.305, 0, 0.08) relative to chassis, which is at (-0.1, 0, 0) relative to base_link
@@ -120,7 +120,8 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='camera_static_transform_publisher',
-        arguments = ['--x', '0.205', '--y', '0', '--z', '0.08', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'camera_link', '--child-frame-id', 'ppp_bot/base_link/camera']
+        arguments = ['--x', '0.205', '--y', '0', '--z', '0.08', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'camera_link', '--child-frame-id', 'ppp_bot/base_link/camera'],
+        parameters=[{'use_sim_time': True}]
     )
 
     return LaunchDescription([

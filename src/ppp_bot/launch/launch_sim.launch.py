@@ -81,7 +81,8 @@ def generate_launch_description():
     ign_launcher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             os.path.join(pkg_path, 'launch', 'launch_ign.launch.py')
-        ])
+        ]),
+        launch_arguments={'world_name': world_name}.items()
     )
 
     slam_launcher = IncludeLaunchDescription(
