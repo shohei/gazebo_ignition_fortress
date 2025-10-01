@@ -1,3 +1,13 @@
+## Update by @shohei
+
+How to run gamefield simulation with the initial position
+
+```bash
+$ ros2 launch ppp_bot launch_sim.launch.py world_name:=gamefield x_pose:=2.1  y_pose:=-1.2
+```
+
+
+
 Comprehensive ROS2 Differential Drive Robot SLAM System
 
 ## Table of Contents
