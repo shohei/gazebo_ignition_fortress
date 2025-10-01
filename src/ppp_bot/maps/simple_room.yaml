@@ -1,4 +1,4 @@
-image: simple_room.pgm
+image: /home/parallels/ros2_ws/src/gazebo_ignition_fortress/src/ppp_bot/maps/simple_room.pgm
 mode: trinary
 resolution: 0.05
 origin: [-9.9, -10.1, 0]
