@@ -1,20 +1,23 @@
 ## Update by @shohei
 
-How to run gamefield simulation with the initial position
+### How to run gamefield simulation with the initial position
 
 ```bash
 $ ros2 launch ppp_bot launch_sim.launch.py world_name:=gamefield x_pose:=2.1  y_pose:=-1.2
 ```
 
-How to run the SLAM for small playground (simple_room)
+### How to run the SLAM for small playground (simple_room)
 
 ```bash
 $ ros2 launch ppp_bot launch_sim.launch.py world_name:=simple_room
 ```
 
-How to run the localization-only simulation for small playground (simple_room)
+### How to run the localization-only simulation for small playground (simple_room)
 
-Note that it loads the custom map (simple_room.yaml/pgm) created by the SLAM above
+Note that it loads the custom map (simple_room.yaml/pgm) created by the SLAM above.
+w
+Also, you need to **initialize the 2D pose** on Rviz. Otherwise, the RobotModel cannot be loaded.
+
 ```bash
 $ ros2 launch ppp_bot launch_sim.launch.py world_name:=simple_room localization:=true
 ```
