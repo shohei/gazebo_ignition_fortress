@@ -22,17 +22,32 @@ def launch_localization(context: LaunchContext, world_name):
     world_name_str = context.perform_substitution(world_name)
     pkg_path = os.path.join(get_package_share_directory('ppp_bot'))
     map_path = os.path.join(pkg_path, 'maps', f'{world_name_str}.yaml')
+    nav2_params_file = os.path.join(pkg_path, 'config', 'nav2_params.yaml')
+
     localization_launcher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             os.path.join(pkg_path, 'launch', 'localization.launch.py')
         ]),
         launch_arguments={
             'use_sim_time': 'true',
-            'map': map_path
+            'map': map_path,
+            'params_file': nav2_params_file
         }.items(),
         condition=IfCondition(LaunchConfiguration('localization'))
     )
-    return [localization_launcher]
+
+    navigation_launcher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(pkg_path, 'launch', 'navigation.launch.py')
+        ]),
+        launch_arguments={
+            'use_sim_time': 'true',
+            'params_file': nav2_params_file
+        }.items(),
+        condition=IfCondition(LaunchConfiguration('navigation'))
+    )
+
+    return [localization_launcher, navigation_launcher]
 
 
 def generate_launch_description():
@@ -42,9 +57,7 @@ def generate_launch_description():
     use_teleop = LaunchConfiguration('use_teleop')
     use_joystick = LaunchConfiguration('use_joystick')
     localization = LaunchConfiguration('localization')
-    x_pose = LaunchConfiguration('x_pose')
-    y_pose = LaunchConfiguration('y_pose')
-    z_pose = LaunchConfiguration('z_pose')
+    navigation = LaunchConfiguration('navigation')
 
 
     # Launch Arguments
@@ -68,17 +81,9 @@ def generate_launch_description():
         'localization',
         default_value='False'
     )
-    x_pose_launch_arg = DeclareLaunchArgument(
-        'x_pose',
-        default_value='0.0'
-    )
-    y_pose_launch_arg = DeclareLaunchArgument(
-        'y_pose',
-        default_value='0.0'
-    )
-    z_pose_launch_arg = DeclareLaunchArgument(
-        'z_pose',
-        default_value='1.0'
+    navigation_launch_arg = DeclareLaunchArgument(
+        'navigation',
+        default_value='False'
     )
 
     
@@ -97,12 +102,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource([
             os.path.join(pkg_path, 'launch', 'launch_ign.launch.py')
         ]),
-        launch_arguments={
-            'world_name': world_name,
-            'x_pose': x_pose,
-            'y_pose': y_pose,
-            'z_pose': z_pose
-        }.items()
+        launch_arguments={'world_name': world_name}.items()
     )
 
     slam_launcher = IncludeLaunchDescription(
@@ -179,9 +179,7 @@ def generate_launch_description():
         use_teleop_launch_arg,
         use_joystick_launch_arg,
         localization_launch_arg,
-        x_pose_launch_arg,
-        y_pose_launch_arg,
-        z_pose_launch_arg,
+        navigation_launch_arg,
         SetEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', models_dir),
         SetEnvironmentVariable('GTK_PATH', ''),
 

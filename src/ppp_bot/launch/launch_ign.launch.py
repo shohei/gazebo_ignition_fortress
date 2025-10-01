@@ -26,8 +26,11 @@ def launch_ign(context: LaunchContext, world_name):
     return [ignition_launcher]
 
 
-def spawn_entity(context: LaunchContext, world_name, robot_description):
+def spawn_entity(context: LaunchContext, world_name, robot_description, x_pose, y_pose, z_pose):
     world_name_str = context.perform_substitution(world_name)
+    x_str = context.perform_substitution(x_pose)
+    y_str = context.perform_substitution(y_pose)
+    z_str = context.perform_substitution(z_pose)
     node = Node(
         package='ros_gz_sim',
         executable='create',
@@ -35,7 +38,9 @@ def spawn_entity(context: LaunchContext, world_name, robot_description):
             '-world', world_name_str,
             '-string', robot_description.toxml(),
             '-name', 'ppp_bot',
-            '-z', '1.0'
+            '-x', x_str,
+            '-y', y_str,
+            '-z', z_str
         ]
     )
 
@@ -69,11 +74,13 @@ def parameter_bridge(context: LaunchContext, world_name):
     args = [
             '/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan',
             f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/image@sensor_msgs/msg/Image[ignition.msgs.Image',
-            f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo']
+            f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo',
+            f'/world/{world_name_str}/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock']
     node = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=args,
+        remappings=[(f'/world/{world_name_str}/clock', '/clock')],
         parameters=[{'use_sim_time': True}]
     )
     return [node]
@@ -85,11 +92,26 @@ def generate_launch_description():
 
     # Launch Configuration
     world_name = LaunchConfiguration('world_name')
+    x_pose = LaunchConfiguration('x_pose')
+    y_pose = LaunchConfiguration('y_pose')
+    z_pose = LaunchConfiguration('z_pose')
 
     # Launch Arguments
     world_name_launch_arg = DeclareLaunchArgument(
         'world_name',
         default_value='cones'
+    )
+    x_pose_launch_arg = DeclareLaunchArgument(
+        'x_pose',
+        default_value='0.0'
+    )
+    y_pose_launch_arg = DeclareLaunchArgument(
+        'y_pose',
+        default_value='0.0'
+    )
+    z_pose_launch_arg = DeclareLaunchArgument(
+        'z_pose',
+        default_value='1.0'
     )
     
     models_dir = os.path.join(pkg_path, 'models')
@@ -126,6 +148,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         world_name_launch_arg,
+        x_pose_launch_arg,
+        y_pose_launch_arg,
+        z_pose_launch_arg,
         SetEnvironmentVariable('LIBGL_ALWAYS_SOFTWARE', '1'),
 SetEnvironmentVariable('MESA_GL_VERSION_OVERRIDE', '3.3'),
 SetEnvironmentVariable('MESA_GLSL_VERSION_OVERRIDE', '330'),
@@ -135,7 +160,7 @@ SetEnvironmentVariable('DISPLAY', ':0'),
 SetEnvironmentVariable('QT_X11_NO_MITSHM', '1'),
         OpaqueFunction(function=launch_ign, args=[world_name]),
         robot_state_publisher,
-        OpaqueFunction(function=spawn_entity, args=[world_name, robot_description]),
+        OpaqueFunction(function=spawn_entity, args=[world_name, robot_description, x_pose, y_pose, z_pose]),
         OpaqueFunction(function=parameter_bridge, args=[world_name]),
         lidar_broadcaster,
         camera_broadcaster,
