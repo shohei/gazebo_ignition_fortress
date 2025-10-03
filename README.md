@@ -1,18 +1,51 @@
-## Update by @shohei
+# Update by @shohei
 
-### How to run gamefield simulation with the initial position
+## How to run the demo script
+
+![](images/demo_nav2.jpeg)
+
+Run simulator (Ignition), RViz2 with localization mode (without SLAM), and Navigation
+
+Note. **You need to initialize the Pose on RViz**
+
+```bash
+$ ros2 launch ppp_bot launch_sim.launch.py world_name:=simple_room localization:=true
+```
+
+
+Run demo script
+
+```
+$ python test_folder/app.py
+```
+
+## How to run gamefield simulation with the initial position
+![](images/gamefield.png)
+
+### SLAM mode
+
 
 ```bash
 $ ros2 launch ppp_bot launch_sim.launch.py world_name:=gamefield x_pose:=2.1  y_pose:=-1.2
 ```
 
-### How to run the SLAM for small playground (simple_room)
+### Localization-only mode
+![](images/gamefield_amcl.png)
+
+```bash
+$ ros2 launch ppp_bot launch_sim.launch.py world_name:=gamefield x_pose:=2.1  y_pose:=-1.2 localization:=true
+```
+
+## How to run the SLAM for small playground (simple_room)
+
+### SLAM mode
 
 ```bash
 $ ros2 launch ppp_bot launch_sim.launch.py world_name:=simple_room
 ```
 
-### How to run the localization-only simulation for small playground (simple_room)
+### Localization-only mode
+![](images/simple_room_amcl.png)
 
 Note that it loads the custom map (simple_room.yaml/pgm) created by the SLAM above.
 
