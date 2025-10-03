@@ -254,9 +254,10 @@ def create_root():
     root = py_trees.composites.Sequence("RootSequence", memory=True)
 
     # Move to specific coordinates
-    move1 = MoveToPosition("MoveToPoint1", 1.0, 1.0, tolerance=0.2)  # Move to (1.0, 1.0). Tolerance is not used anymore so ignore it. 
+    #move1 = MoveToPosition("MoveToPoint1", 1.0, 1.0, tolerance=0.2)  # Move to (1.0, 1.0). Tolerance is not used anymore so ignore it. 
+    move1 = MoveToPosition("MoveToPoint1", 2.1, 0.0, tolerance=0.2)  # Move to (1.0, 1.0). Tolerance is not used anymore so ignore it. 
     task1 = PrintHello("Task1")
-    move2 = MoveToPosition("MoveToPoint2", -1.0, -1.0, tolerance=0.2)  # Move to (-1.0, -1.0). Tolerance is not used anymore so ignore it. 
+    move2 = MoveToPosition("MoveToPoint2", 0, -1.2, tolerance=0.2)  # Move to (-1.0, -1.0). Tolerance is not used anymore so ignore it. 
     task2 = PrintHi("Task2")
 
     # Add to sequence
@@ -311,12 +312,7 @@ def main():
             if tree_completed:
                 return  # Don't execute if already completed
 
-            node.tick_tock(period_ms=100)
-            #print(f"Tree status: {node.root.status}")
-
-            # Print status of each child
-            for i, child in enumerate(node.root.children):
-                print(f"  Child {i} ({child.name}): {child.status}")
+            node.tick_tock(period_ms=500)  # Match timer interval
 
             if node.root.status == py_trees.common.Status.SUCCESS:
                 print("Behavior tree completed successfully!")
