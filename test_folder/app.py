@@ -254,9 +254,9 @@ def create_root():
     root = py_trees.composites.Sequence("RootSequence", memory=True)
 
     # Move to specific coordinates
-    move1 = MoveToPosition("MoveToPoint1", 1.0, 1.0, tolerance=0.2)  # Move to (1.0, 1.0) with tolerance
+    move1 = MoveToPosition("MoveToPoint1", 1.0, 1.0, tolerance=0.2)  # Move to (1.0, 1.0). Tolerance is not used anymore so ignore it. 
     task1 = PrintHello("Task1")
-    move2 = MoveToPosition("MoveToPoint2", -1.0, -1.0, tolerance=0.2)  # Move to (-1.0, -1.0) with tolerance
+    move2 = MoveToPosition("MoveToPoint2", -1.0, -1.0, tolerance=0.2)  # Move to (-1.0, -1.0). Tolerance is not used anymore so ignore it. 
     task2 = PrintHi("Task2")
 
     # Add to sequence
