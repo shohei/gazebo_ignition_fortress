@@ -135,15 +135,20 @@ def generate_launch_description():
             remappings=[('/cmd_vel_out', '/diff_drive_base_controller/cmd_vel_unstamped')]
         )
 
-    # navigation_launcher = IncludeLaunchDescription(
-    #         PythonLaunchDescriptionSource(
-    #             [os.path.join(pkg_path,
-    #                           'launch', 'navigation.launch.py')]),
-    #         launch_arguments=[('use_sim_time', 'true')])
+    navigation_launcher = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [os.path.join(pkg_path,
+                              'launch', 'navigation.launch.py')]),
+            launch_arguments={
+                'use_sim_time': 'true',
+                'params_file': os.path.join(pkg_path, 'config', 'nav2_params.yaml')
+            }.items(),
+            condition=IfCondition(localization)
+        )
 
     delayed_rviz_nav = TimerAction(period=10.0, actions=[
         rviz_node,
-        # navigation_launcher
+        navigation_launcher
     ])
     
     
