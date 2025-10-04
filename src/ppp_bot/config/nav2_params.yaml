@@ -30,7 +30,7 @@ amcl:
     save_pose_rate: 0.5
     sigma_hit: 0.2
     tf_broadcast: true
-    transform_tolerance: 1.0
+    transform_tolerance: 2.0
     update_min_a: 0.2
     update_min_d: 0.25
     z_hit: 0.5
@@ -133,8 +133,10 @@ controller_server:
     general_goal_checker:
       stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.15
-      yaw_goal_tolerance: 0.25
+      #xy_goal_tolerance: 0.15
+      xy_goal_tolerance: 0.05
+      #yaw_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.05
     # DWB parameters
     FollowPath:
       plugin: "dwb_core::DWBLocalPlanner"
@@ -161,7 +163,7 @@ controller_server:
       sim_time: 1.7
       linear_granularity: 0.05
       angular_granularity: 0.025
-      transform_tolerance: 0.2
+      transform_tolerance: 0.5
       xy_goal_tolerance: 0.15
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: True
@@ -190,12 +192,14 @@ local_costmap:
       width: 5
       height: 5
       resolution: 0.05
-      robot_radius: 0.3
+      #robot_radius: 0.3
+      robot_radius: 0.15
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.9
+        #inflation_radius: 0.9
+        inflation_radius: 0.1
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -253,7 +257,8 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
-        inflation_radius: 0.55
+        #inflation_radius: 0.55
+        inflation_radius: 0.1
       always_send_full_costmap: True
 
 map_server:
@@ -278,7 +283,8 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.5
+      #tolerance: 0.5
+      tolerance: 0.1
       use_astar: false
       allow_unknown: true
 
