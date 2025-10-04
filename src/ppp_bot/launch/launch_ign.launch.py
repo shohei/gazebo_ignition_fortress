@@ -22,7 +22,7 @@ def launch_ign(context: LaunchContext, world_name):
             PythonLaunchDescriptionSource(
                 [os.path.join(get_package_share_directory('ros_gz_sim'),
                               'launch', 'gz_sim.launch.py')]),
-            launch_arguments=[('gz_args', [f' -r {world_file}'])])
+            launch_arguments=[('gz_args', [f'-r {world_file}'])])
     return [ignition_launcher]
 
 
@@ -71,19 +71,21 @@ def spawn_entity(context: LaunchContext, world_name, robot_description, x_pose, 
 
 def parameter_bridge(context: LaunchContext, world_name):
     world_name_str = context.perform_substitution(world_name)
-    args = [
+
+    # Sensor bridge only - ros_gz_sim already provides clock bridge
+    sensor_args = [
             '/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan',
             f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/image@sensor_msgs/msg/Image[ignition.msgs.Image',
-            f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo',
-            f'/world/{world_name_str}/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock']
-    node = Node(
+            f'/world/{world_name_str}/model/ppp_bot/link/base_link/sensor/camera/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo']
+    sensor_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=args,
-        remappings=[(f'/world/{world_name_str}/clock', '/clock')],
-        parameters=[{'use_sim_time': True}]
+        name='sensor_bridge',
+        arguments=sensor_args,
+        parameters=[{'use_sim_time': True}],
+        output='screen'
     )
-    return [node]
+    return [sensor_bridge]
 
 
 
@@ -125,14 +127,24 @@ def generate_launch_description():
     )
 
     # static tf2 broadcasters for model sensors
-    # These transforms map from the sensor frames to the Gazebo sensor frames
+    # These transforms map from base_link to the sensor frames
     # The lidar is positioned at (0.15, 0, 0.15) relative to chassis, which is at (-0.1, 0, 0) relative to base_link
     # So lidar is at (0.05, 0, 0.15) relative to base_link
     lidar_broadcaster = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='lidar_static_transform_publisher',
-        arguments = ['--x', '0.05', '--y', '0', '--z', '0.15', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'lidar_frame', '--child-frame-id', 'ppp_bot/base_link/gpu_lidar'],
+        arguments = ['--x', '0.05', '--y', '0', '--z', '0.15', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'base_link', '--child-frame-id', 'lidar_frame'],
+        parameters=[{'use_sim_time': True}]
+    )
+
+    # Additional transform to connect Gazebo's lidar frame to our lidar_frame
+    # This is an identity transform since they represent the same physical sensor
+    gazebo_lidar_broadcaster = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='gazebo_lidar_static_transform_publisher',
+        arguments = ['--x', '0', '--y', '0', '--z', '0', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'lidar_frame', '--child-frame-id', 'ppp_bot/base_link/gpu_lidar'],
         parameters=[{'use_sim_time': True}]
     )
 
@@ -142,7 +154,16 @@ def generate_launch_description():
         package='tf2_ros',
         executable='static_transform_publisher',
         name='camera_static_transform_publisher',
-        arguments = ['--x', '0.205', '--y', '0', '--z', '0.08', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'camera_link', '--child-frame-id', 'ppp_bot/base_link/camera'],
+        arguments = ['--x', '0.205', '--y', '0', '--z', '0.08', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'base_link', '--child-frame-id', 'camera_link'],
+        parameters=[{'use_sim_time': True}]
+    )
+
+    # Additional transform to connect Gazebo's camera frame to our camera_link
+    gazebo_camera_broadcaster = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='gazebo_camera_static_transform_publisher',
+        arguments = ['--x', '0', '--y', '0', '--z', '0', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'camera_link', '--child-frame-id', 'ppp_bot/base_link/camera'],
         parameters=[{'use_sim_time': True}]
     )
 
@@ -163,5 +184,7 @@ SetEnvironmentVariable('QT_X11_NO_MITSHM', '1'),
         OpaqueFunction(function=spawn_entity, args=[world_name, robot_description, x_pose, y_pose, z_pose]),
         OpaqueFunction(function=parameter_bridge, args=[world_name]),
         lidar_broadcaster,
+        gazebo_lidar_broadcaster,
         camera_broadcaster,
+        gazebo_camera_broadcaster,
     ])
